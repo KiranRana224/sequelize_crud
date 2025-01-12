@@ -50,10 +50,63 @@ async function addUsers(req, res) {
 			});
 		} else {
 			// For other errors, send a 500 Internal Server Error response
-			console.error("Error adding user:", error);
 			res.status(500).json({ error: error.message });
 		}
 	}
 }
 
-module.exports = { addUsers };
+async function getAllUsers(req, res) {
+	try {
+		// Destructure page and limit with default values
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;
+
+		// Calculate offset for pagination
+		const offset = (page - 1) * limit;
+		const users = await User.findAll({
+			limit: limit,
+			offset: offset,
+		});
+
+		res.status(200).json(users);
+	} catch (error) {
+		res.status(500).json({ message: error });
+	}
+}
+
+async function getUserById(req, res) {
+	try {
+		const id = req.params.id;
+		const user = await User.findOne({
+			where: { user_id: id },
+		});
+		if (!user) {
+			// If no user is found, return a 404
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		// Update the user with the data from the request body
+		await user.update(req.body);
+		res.status(200).json(user);
+	} catch (error) {
+		res.status(200).json(error);
+	}
+}
+
+async function deleteUserById(req, res) {
+	try {
+		const id = req.params.id;
+		const user = await User.findOne({ where: { user_id: id } });
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		await user.destroy();
+		res.status(200).json({ message: "User deleted successfully" });
+	} catch (error) {
+		res.status(500).json({ message: "Error deleting user", error });
+	}
+}
+
+module.exports = { addUsers, getAllUsers, getUserById, deleteUserById };

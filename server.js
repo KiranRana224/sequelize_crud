@@ -23,7 +23,7 @@ app.use("/", routes);
 
 // Sync all models
 sequelize
-	.sync({ force: true }) // Use force: true to drop tables if they exist (use only in development)
+	.sync({ alter: true }) // Use force: true to drop tables if they exist (use only in development)
 	.then(() => {
 		console.log("Database & tables created!");
 	})
